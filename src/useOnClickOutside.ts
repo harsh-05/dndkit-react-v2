@@ -15,12 +15,14 @@ export function useOutsideClick(ref: React.RefObject<Element | null>, callback: 
         };
 
         // Use { capture: true } to listen on the capturing phase
-        document.addEventListener('mousedown', handleClickOutside, { capture: true });
+        document.addEventListener('click', handleClickOutside, { capture: true });
+        // update touchstart to touchend to match the click 
         document.addEventListener('touchstart', handleClickOutside, { capture: true });
 
         return () => {
             // Make sure to pass { capture: true } to removeEventListener as well!
-            document.removeEventListener('mousedown', handleClickOutside, { capture: true });
+            document.removeEventListener('click', handleClickOutside, { capture: true });
+            // update touchstart to touchend to match the click 
             document.removeEventListener('touchstart', handleClickOutside, { capture: true });
         };
     }, [ref]);
