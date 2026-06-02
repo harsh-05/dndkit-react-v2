@@ -49,11 +49,11 @@ export function ColumnCard({
           <div className=" grow text-md font-medium uppercase  pl-4 wrap-break-word min-w-0">
             {col.name}
           </div>
-          <div className="shrink-0">
+          <span className="shrink-0 mx-1 text-[14px]">
             { sortedTasks.length}
-          </div>
-          <div className=" shrink-0 rounded-md hover:bg-black/20 p-1 ">
-            <ThreeDotsHorizontal></ThreeDotsHorizontal>
+          </span>
+          <div className=" shrink-0 rounded-md hover:bg-black/20 p-2 ">
+            <ThreeDotsHorizontal className="size-4"></ThreeDotsHorizontal>
           </div>
         </div>
 
