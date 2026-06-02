@@ -28,7 +28,10 @@ export function KanbanBoard() {
   };
 
   const generateTask = (taskName: string, colId: Id) => {
-    if (taskName === '' || colId === '') throw new Error("Either no taskname or column Id !!!!");
+    if (taskName === '' || colId === '') {
+      setTempTask(undefined);
+      return;
+    } 
     const id = crypto.randomUUID();
     setTasks((prev) => {
           const colTasks = [...prev]
@@ -59,7 +62,7 @@ export function KanbanBoard() {
       <div className="flex items-start gap-2 h-full overflow-x-auto">
         <DragDropProvider onDragEnd={handledragEnd}>
           {sortedColumns.map((cols: Column, ind) => {
-            return <ColumnCard tempTask={cols.id === tempTask?.colId ? tempTask : undefined} setTempTask={setTempTask} col={cols} index={ind} key={cols.id} generateTask={generateTask} />;
+            return <ColumnCard tempTask={cols.id === tempTask?.colId ? tempTask : undefined} setTempTask={setTempTask} col={cols} index={ind} key={cols.id} generateTask={generateTask} tasks={tasks.filter((task)=>task.colId === cols.id)} />;
           })}
 
           <DragOverlay>
