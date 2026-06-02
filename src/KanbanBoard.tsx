@@ -70,7 +70,7 @@ export function KanbanBoard() {
               if (source && source.type === "column")
               
                 return (
-                  <ColumnCardPreview tempTask={ tempTask} col={source.data.column}></ColumnCardPreview>
+                  <ColumnCardPreview tempTask={ tempTask} col={source.data.column} tasks={tasks.filter((task)=>task.colId === source.id)}></ColumnCardPreview>
                 );
               return null;
             

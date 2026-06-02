@@ -79,15 +79,19 @@ export function ColumnCard({
 export function ColumnCardPreview({
   col,
   tempTask,
-  //   tasks,
+    tasks,
 }: {
   col: Column;
   tempTask: DraftTask | undefined;
-  //   tasks: Task[];
-}) {
+    tasks: Task[];
+  }) {
+    const sortedTasks = [...tasks].sort((a, b) =>
+      a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0,
+    );
+  
   return (
     // max-h-full removed, check and verify.
-    <div className="bg-neutral-200 min-w-68 max-w-68  flex flex-col rounded-md p-2 opacity-80 ">
+    <div className="bg-neutral-200 min-w-68 max-w-68 max-h-full flex flex-col rounded-md p-2 opacity-80 ">
       <div className="flex flex-col min-h-0">
         <div className="flex justify-between items-center mb-5">
           <div className="text-md font-medium uppercase  pl-4 min-w-0 wrap-break-word">
@@ -98,7 +102,11 @@ export function ColumnCardPreview({
           </div>
         </div>
 
-        <div className="flex flex-col  min-h-0 flex-1 overflow-y-hidden "></div>
+        <div className="flex flex-col  min-h-0 flex-1 overflow-y-hidden ">
+          {sortedTasks.map((task: Task) => {
+            return <TaskCard task={task} key={task.id}></TaskCard>;
+          })}
+        </div>
 
         {/* Add Card Input Box... Like in trello */}
         <AddTask tempTask={tempTask}></AddTask>
