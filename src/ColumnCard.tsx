@@ -3,6 +3,7 @@ import { AddIcon, ThreeDotsHorizontal } from "./Icons";
 import type { Column, DraftTask, Id, Task } from "./types";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useOutsideClick } from "./useOnClickOutside";
+import { TaskCard } from "./TaskCard";
 
 export function ColumnCard({
   col,
@@ -10,7 +11,7 @@ export function ColumnCard({
   generateTask,
   tempTask,
   setTempTask,
-  // tasks,
+  tasks,
 }: {
   col: Column;
   index: number;
@@ -19,16 +20,20 @@ export function ColumnCard({
   //   setColTaskName?: Dispatch<SetStateAction<DraftTask | undefined>>;
   //   coltaskName?: DraftTask | undefined;
   generateTask: (taskName: string, colId: Id) => void;
-  //   tasks: Task[];
+    tasks: Task[];
 }) {
   //need to be removed
 
-  const { ref, isDragging } = useSortable({
+  const { ref, isDragging, handleRef } = useSortable({
     id: col.id,
     index,
     type: "column",
     data: { colId: col.id, rank: col.rank, column: col },
   });
+
+  const sortedTasks = [...tasks].sort((a, b) =>
+    a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0,
+  );
 
   return (
     <div
@@ -40,17 +45,24 @@ export function ColumnCard({
       <div
         className={`${isDragging ? "opacity-0" : ""} h-full flex flex-col min-h-0`}
       >
-        <div className="flex justify-between items-center mb-5 ">
-          <div className="text-md font-medium uppercase  pl-4 wrap-break-word min-w-0">
+        <div ref={handleRef} className="flex items-center mb-5 ">
+          <div className=" grow text-md font-medium uppercase  pl-4 wrap-break-word min-w-0">
             {col.name}
           </div>
-          <div className=" rounded-md hover:bg-black/20 p-1 ">
+          <div className="shrink-0">
+            { sortedTasks.length}
+          </div>
+          <div className=" shrink-0 rounded-md hover:bg-black/20 p-1 ">
             <ThreeDotsHorizontal></ThreeDotsHorizontal>
           </div>
         </div>
 
         {/* Displaying the tasks here... */}
-        <div className="flex flex-col  flex-1 min-h-0 overflow-y-auto  "></div>
+        <div className="flex flex-col  flex-1 min-h-0 overflow-y-auto  ">
+          {sortedTasks.map((task: Task) => {
+            return <TaskCard task={task} key={task.id}></TaskCard>;
+          })}
+        </div>
 
         {/* Add Card Input Box... Like in trello */}
         <AddTask
@@ -110,6 +122,7 @@ function AddTask({
 
   useOutsideClick(ref, () => {
     if (setTempTask && generateTask && tempTask && colId) {
+      if(tempTask.taskName !== '' && colId !== '') 
       generateTask(tempTask?.taskName, colId)
       setTempTask(undefined);
     }
@@ -138,6 +151,11 @@ function AddTask({
           if (e.key === "Enter" && generateTask && colId) {
             e.preventDefault();
             generateTask(tempTask.taskName, colId);
+            if(setTempTask)
+            setTempTask((prev) => {
+              if (!prev) return prev;
+              return {...prev, taskName: ''}
+            })
           }
         }}
         onChange={(e) => {
