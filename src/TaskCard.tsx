@@ -1,11 +1,22 @@
+import { useSortable } from "@dnd-kit/react/sortable";
 import type { Task } from "./types";
 
-export function TaskCard({ task }: { task: Task }) {
+export function TaskCard({ task, ind }: { task: Task, ind:number }) {
 
-  const isDragging = false;
+  const { ref, isDragging } = useSortable({
+    id: task.id,
+    index: ind,
+    type: "task",
+    accept: 'task',
+    group: task.colId,
+    data: {task, rank: task.rank, colId:task.colId}
+
+  })
+
+  
   return (
     <div
-     
+     ref={ref}
       className={` ${isDragging ? "bg-neutral-400" : " bg-neutral-100"} w-full min-h-12 rounded-md mt-2 flex flex-col justify-center`}
     >
       <div

@@ -5,10 +5,12 @@ import {
   DragDropProvider,
   DragOverlay,
   type DragEndEvent,
+  type DragOverEvent,
 } from "@dnd-kit/react";
 import { generateKeyBetween } from "fractional-indexing";
 import { ColumnCard, ColumnCardPreview } from "./ColumnCard";
 import { isSortable } from "@dnd-kit/react/sortable";
+import { TaskCardPreview } from "./TaskCard";
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState<Column[]>([]);
@@ -71,7 +73,9 @@ export function KanbanBoard() {
               
                 return (
                   <ColumnCardPreview tempTask={ tempTask} col={source.data.column} tasks={tasks.filter((task)=>task.colId === source.id)}></ColumnCardPreview>
-                );
+              );
+            if (source && source.type === 'task')
+              return <TaskCardPreview task={source.data.task} />
               return null;
             
             }}
@@ -80,6 +84,10 @@ export function KanbanBoard() {
         <AddColumn generateColumn={generateColumn}></AddColumn>
       </div>
   );
+
+  function handleDragOver(event: DragOverEvent) {
+
+  }
 
   function handledragEnd(event: DragEndEvent) {
     const source = event.operation.source;

@@ -3,7 +3,7 @@ import { AddIcon, ThreeDotsHorizontal } from "./Icons";
 import type { Column, DraftTask, Id, Task } from "./types";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useOutsideClick } from "./useOnClickOutside";
-import { TaskCard } from "./TaskCard";
+import { TaskCard, TaskCardPreview } from "./TaskCard";
 
 export function ColumnCard({
   col,
@@ -28,6 +28,8 @@ export function ColumnCard({
     id: col.id,
     index,
     type: "column",
+    group: "column",
+    accept: ['task','column'],
     data: { colId: col.id, rank: col.rank, column: col },
   });
 
@@ -59,8 +61,8 @@ export function ColumnCard({
 
         {/* Displaying the tasks here... */}
         <div className="flex flex-col  flex-1 min-h-0 overflow-y-auto  ">
-          {sortedTasks.map((task: Task) => {
-            return <TaskCard task={task} key={task.id}></TaskCard>;
+          {sortedTasks.map((task: Task, ind) => {
+            return <TaskCard task={task} key={task.id} ind={ind}></TaskCard>;
           })}
         </div>
 
@@ -104,7 +106,7 @@ export function ColumnCardPreview({
 
         <div className="flex flex-col  min-h-0 flex-1 overflow-y-hidden ">
           {sortedTasks.map((task: Task) => {
-            return <TaskCard task={task} key={task.id}></TaskCard>;
+            return <TaskCardPreview task={task} key={task.id}></TaskCardPreview>;
           })}
         </div>
 
