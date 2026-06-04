@@ -50,7 +50,7 @@ export function AddColumn({
   if (!active) {
     return (
       <button
-        onClick={(e) => {
+        onClick={() => {
           setActive(true);
         }}
         className="min-w-68 max-w-68 min-h-12 bg-white flex gap-4 items-center p-2 rounded-md shadow-md active:shadow-sm"
@@ -74,7 +74,7 @@ export function AddColumn({
         />
         <div className="flex items-center">
           <button
-            onClick={(e) => {
+            onClick={() => {
               handleColumnAdd();
               inputref.current?.focus();
             }}

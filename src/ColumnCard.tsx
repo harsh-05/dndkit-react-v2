@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { AddIcon, ThreeDotsHorizontal } from "./Icons";
 import type { Column, DraftTask, Id, Task } from "./types";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useOutsideClick } from "./useOnClickOutside";
 import { TaskCard, TaskCardPreview } from "./TaskCard";
+import {CollisionPriority} from '@dnd-kit/abstract';
 
 export function ColumnCard({
   col,
@@ -28,8 +29,9 @@ export function ColumnCard({
     id: col.id,
     index,
     type: "column",
-    group: "column",
-    accept: ['task','column'],
+    group :"column",
+    accept: ["task", "column"],
+    collisionPriority: CollisionPriority.Lowest,
     data: { colId: col.id, rank: col.rank, column: col },
   });
 

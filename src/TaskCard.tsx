@@ -1,17 +1,18 @@
 import { useSortable } from "@dnd-kit/react/sortable";
 import type { Task } from "./types";
-
+import { CollisionPriority } from '@dnd-kit/abstract'
 export function TaskCard({ task, ind }: { task: Task, ind:number }) {
 
   const { ref, isDragging } = useSortable({
     id: task.id,
     index: ind,
     type: "task",
-    accept: 'task',
+    accept: "task",
     group: task.colId,
-    data: {task, rank: task.rank, colId:task.colId}
-
-  })
+    collisionPriority: CollisionPriority.Normal,
+    data: { task, rank: task.rank, colId: task.colId },
+   
+  });
 
   
   return (
