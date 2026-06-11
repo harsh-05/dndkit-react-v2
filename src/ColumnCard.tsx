@@ -13,6 +13,7 @@ export function ColumnCard({
   tempTask,
   setTempTask,
   tasks,
+  preserveTaskOrder = false
 }: {
   col: Column;
   index: number;
@@ -21,6 +22,7 @@ export function ColumnCard({
   //   setColTaskName?: Dispatch<SetStateAction<DraftTask | undefined>>;
   //   coltaskName?: DraftTask | undefined;
   generateTask: (taskName: string, colId: Id) => void;
+    preserveTaskOrder?: boolean;
     tasks: Task[];
 }) {
   //need to be removed
@@ -35,7 +37,7 @@ export function ColumnCard({
     data: { colId: col.id, rank: col.rank, column: col },
   });
 
-  const sortedTasks = [...tasks].sort((a, b) =>
+  const sortedTasks = preserveTaskOrder ? tasks :  [...tasks].sort((a, b) =>
     a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0,
   );
 
