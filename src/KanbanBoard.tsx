@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AddColumn } from "./AddColumn";
 import type { Column, DraftTask, Id, Task } from "./types";
 import {
@@ -6,6 +6,7 @@ import {
   DragOverlay,
   type DragEndEvent,
   type DragOverEvent,
+  type DragStartEvent,
 } from "@dnd-kit/react";
 import { generateKeyBetween } from "fractional-indexing";
 import { ColumnCard, ColumnCardPreview } from "./ColumnCard";
@@ -16,6 +17,8 @@ export function KanbanBoard() {
   const [columns, setColumns] = useState<Column[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tempTask, setTempTask] = useState<DraftTask>();
+  const [activeTaskId, setActiveTaskId] = useState<Id | null>(null);
+  const tasksSnapshot = useRef<Task[]>([]);
 
   const generateColumn = (name: string) => {
     const id = crypto.randomUUID();
@@ -63,7 +66,11 @@ export function KanbanBoard() {
 
   return (
     <div className="flex items-start gap-2 h-full overflow-x-auto">
-      <DragDropProvider onDragEnd={handledragEnd} onDragOver={handleDragOver}>
+      <DragDropProvider
+        onDragEnd={handledragEnd}
+        onDragOver={handleDragOver}
+        onDragStart={handleDragStart}
+      >
         {sortedColumns.map((cols: Column, ind) => {
           return (
             <ColumnCard
@@ -74,6 +81,7 @@ export function KanbanBoard() {
               key={cols.id}
               generateTask={generateTask}
               tasks={tasks.filter((task) => task.colId === cols.id)}
+              preserveTaskOrder={activeTaskId !== null}
             />
           );
         })}
@@ -98,6 +106,21 @@ export function KanbanBoard() {
     </div>
   );
 
+  function handleDragStart(event: DragStartEvent) {
+    const source = event.operation.source;
+
+    if (!isSortable(source) || source.type != "task") return;
+    setActiveTaskId(source.id);
+    setTasks((prev) => {
+      const sortedTasks = [...prev].sort((a, b) =>
+        a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0,
+      );
+
+      tasksSnapshot.current = sortedTasks;
+      return sortedTasks;
+    });
+  }
+
   function handleDragOver(event: DragOverEvent) {
     const source = event.operation.source;
     const target = event.operation.target;
@@ -105,38 +128,35 @@ export function KanbanBoard() {
     if (!isSortable(source) || !target || !source || !isSortable(target))
       return;
     if (source.type !== "task") return;
-    if ((target.type === "column" && target.id !== source.group) || (target.type === "task" && target.group !== source.group) ) {
+    if (target.type === "column" || target.type === "task") {
       event.preventDefault();
       setTasks((prev) => {
+        const task = prev.find((item) => item.id === source.id);
+        if (!task) return prev;
 
-        if (target.type === 'task') {
-             const colTasks = [...prev]
-               .filter((task) => task.colId === target.group)
-               .sort((a, b) =>
-                 a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0,
-          );
-          
-          const beforeRank = colTasks[target.index - 1]?.rank ?? null;
-          const afterRank = colTasks[target.index]?.rank ?? null;
-          const rank = generateKeyBetween(beforeRank, afterRank);
+        const targetColId = target.type === "task" ? target.group : target.id;
+        if (targetColId == null) return prev;
+        const tasksWithoutSource = prev.filter((item) => item.id !== source.id);
+        const colTasks = tasksWithoutSource.filter(
+          (item) => item.colId === targetColId,
+        );
+        const targetIndex =
+          target.type === "column"
+            ? colTasks.length
+            : Math.max(0, Math.min(target.index, colTasks.length));
+        const targetTask = colTasks[targetIndex];
+        const lastTask = colTasks[colTasks.length - 1];
+        const insertIndex = targetTask
+          ? tasksWithoutSource.findIndex((item) => item.id === targetTask.id)
+          : lastTask
+            ? tasksWithoutSource.findIndex((item) => item.id === lastTask.id) +
+              1
+            : tasksWithoutSource.length;
 
-          return [...prev].map((task) => task.id === source.id ? {...task, colId: target.group!, rank} : task)
-        }
-
-         if (target.type === 'column') {
-
-          const colTasks = [...prev]
-            .filter((task) => task.colId === target.id)
-            .sort((a, b) => (a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0));
-        
-          let rank = generateKeyBetween(colTasks[colTasks.length - 1]?.rank ?? null, null);
-
-          return [...prev].map((task) =>
-            task.id === source.id ? { ...task, colId: target.id, rank } : task
-          )
-        }
-        return prev
-      }); 
+        const updatedTasks = [...tasksWithoutSource];
+        updatedTasks.splice(insertIndex, 0, { ...task, colId: targetColId });
+        return updatedTasks;
+      });
     }
 
     console.log("Initial Group" + source.initialGroup);
@@ -160,7 +180,13 @@ export function KanbanBoard() {
 
   function handledragEnd(event: DragEndEvent) {
     const source = event.operation.source;
-    if (!isSortable(source)) return;
+    if (!isSortable(source)) {
+      if (activeTaskId !== null && event.canceled) {
+        setTasks(tasksSnapshot.current);
+      }
+      setActiveTaskId(null);
+      return;
+    }
     const { index, initialIndex } = source;
     // console.log(index);
     // console.log(initialIndex);
@@ -199,39 +225,52 @@ export function KanbanBoard() {
       });
     }
 
-    if (source.type === 'task') {
+    if (source.type === "task") {
+      setActiveTaskId(null);
+
+      if (event.canceled) {
+        setTasks(tasksSnapshot.current);
+        return;
+      }
+
       setTasks((prev) => {
-        const sortedTask = [...prev]
-          .filter((task) => task.colId === source.group)
-          .sort((a, b) => (a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0));
-        
-        let beforeRank = null;
-        let afterRank = null;
-        if (initialIndex === index) return prev;
-        if (initialIndex < index) {
-          beforeRank = sortedTask[index]?.rank ?? null;
-          afterRank =
-            index < sortedTask.length - 1
-              ? sortedTask[index + 1]?.rank
-              : null;
-        }
-        if (initialIndex > index) {
-          beforeRank = index > 0 ? sortedTask[index - 1].rank : null;
-          afterRank = sortedTask[index].rank;
-        }
+        const currentTask = prev.find((task) => task.id === source.id);
+        const initialTask = tasksSnapshot.current.find(
+          (task) => task.id === source.id,
+        );
+        if (!currentTask || !initialTask) return prev;
+
+        const sortedTask = prev.filter(
+          (task) => task.colId === currentTask.colId,
+        );
+        const initialSortedTask = tasksSnapshot.current.filter(
+          (task) => task.colId === initialTask.colId,
+        );
+        const taskIndex = sortedTask.findIndex((task) => task.id === source.id);
+        const initialTaskIndex = initialSortedTask.findIndex(
+          (task) => task.id === source.id,
+        );
+        if (taskIndex === -1) return prev;
+        if (
+          initialTask.colId === currentTask.colId &&
+          initialTaskIndex === taskIndex
+        )
+          return prev;
+
+        const beforeRank = sortedTask[taskIndex - 1]?.rank ?? null;
+        const afterRank = sortedTask[taskIndex + 1]?.rank ?? null;
         const newRank = generateKeyBetween(beforeRank, afterRank);
         const updatedTasks = [...prev].map((task) =>
-          task.id === source.id ? { ...task, rank: newRank, colId: source.group! } : task,
+          task.id === source.id ? { ...task, rank: newRank } : task,
         );
         [...updatedTasks]
-          .filter((task) => task.colId === source.group)
+          .filter((task) => task.colId === currentTask.colId)
           .sort((a, b) => (a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0))
           .map((task) => console.log(task));
 
         return updatedTasks;
       });
-      //Logging to check the correct rank generation.
-    
+
     }
   }
 }

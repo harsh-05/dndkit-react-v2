@@ -10,10 +10,12 @@ Problem 2. removeChild error
 
       Possible Cause: 
 
+      Easy to understand this error.
+
 
 Problem 3. OptimisticSortingPlugin silently aborts intra-column reordering after cross-column state mutations corrupt internal cache | |
 
             OptimisticSortingPlugin: intra-column sorting intermittently fails after cross-column drag operations
 
 
-      
+    Solution: Do the array splicing in dragOver event with event.preventDefault() all the way,
