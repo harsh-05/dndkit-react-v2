@@ -23,7 +23,7 @@ export function TaskCard({ task, ind }: { task: Task, ind:number }) {
       <div
         className={`${isDragging ? "opacity-0" : ""}`}
       >
-        <div className="ml-2">{task.taskName}</div>
+        <div className="px-2 wrap-break-word">{task.taskName}</div>
       </div>
     </div>
   );

@@ -64,7 +64,7 @@ export function ColumnCard({
         </div>
 
         {/* Displaying the tasks here... */}
-        <div className="flex flex-col  flex-1 min-h-0 overflow-y-auto  ">
+        <div className="flex flex-col  flex-1 min-h-0 overflow-y-auto  pr-1">
           {sortedTasks.map((task: Task, ind) => {
             return <TaskCard task={task} key={task.id} ind={ind}></TaskCard>;
           })}
@@ -108,7 +108,7 @@ export function ColumnCardPreview({
           </div>
         </div>
 
-        <div className="flex flex-col  min-h-0 flex-1 overflow-y-hidden ">
+        <div className="flex flex-col  min-h-0 flex-1 overflow-y-hidden wrap-break-word">
           {sortedTasks.map((task: Task) => {
             return <TaskCardPreview task={task} key={task.id}></TaskCardPreview>;
           })}
@@ -179,12 +179,7 @@ function AddTask({
           });
         }}
         className="shrink-0 w-full bg-neutral-50 min-h-8 max-h-32 mt-2 pl-2 pr-4 pb-4 pt-2 resize-none focus:outline-none rounded-md shadow-md
-         [&::-webkit-scrollbar]:rounded-md
-         [&::-webkit-scrollbar]:w-3
-          [&::-webkit-scrollbar-track]:rounded-md
-          [&::-webkit-scrollbar-track]:bg-zinc-100
-           [&::-webkit-scrollbar-thumb]:rounded-md
-         [&::-webkit-scrollbar-thumb]:bg-zinc-400
+         
          "
         autoFocus
       ></textarea>
