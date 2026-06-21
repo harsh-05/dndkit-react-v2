@@ -13,5 +13,6 @@ export type DraftTask = {
 
 export type Task = DraftTask & {
     id: Id,
-    rank: string
+    rank: string,
+    completed: boolean
 }

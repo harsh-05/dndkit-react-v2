@@ -1,8 +1,16 @@
 import { useSortable } from "@dnd-kit/react/sortable";
 import type { Task } from "./types";
-import { CollisionPriority } from '@dnd-kit/abstract'
-export function TaskCard({ task, ind }: { task: Task, ind:number }) {
-
+import { CollisionPriority } from "@dnd-kit/abstract";
+import { CheckBox } from "./Components/CheckBox";
+export function TaskCard({
+  task,
+  ind,
+  setTasks,
+}: {
+  task: Task;
+  ind: number;
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+}) {
   const { ref, isDragging } = useSortable({
     id: task.id,
     index: ind,
@@ -11,19 +19,35 @@ export function TaskCard({ task, ind }: { task: Task, ind:number }) {
     group: task.colId,
     collisionPriority: CollisionPriority.Normal,
     data: { task, rank: task.rank, colId: task.colId },
-   
   });
 
-  
+
+  const strikethrough = {1: 'line-through', 0: ''}
+
   return (
     <div
-     ref={ref}
-      className={` ${isDragging ? "bg-neutral-400" : " bg-neutral-100"} w-full min-h-12 rounded-md mt-2 flex flex-col justify-center`}
+      ref={ref}
+      className={` ${isDragging ? "bg-neutral-400" : " bg-neutral-100"} group w-full min-h-12 rounded-md mt-2 flex flex-col justify-center`}
     >
       <div
-        className={`${isDragging ? "opacity-0" : ""}`}
+        className={`${isDragging ? "opacity-0" : ""} flex items-center px-2`}
       >
-        <div className="px-2 wrap-break-word">{task.taskName}</div>
+        <div>
+          <CheckBox
+            checked={task.completed}
+            size={5}
+            onChange={(e) => {
+              setTasks((prev) => {
+                return prev.map((t) => {
+                  if (t.id === task.id) return { ...t, completed: !t.completed }
+                  else return t
+                })
+                
+              })
+            }}
+          ></CheckBox>
+        </div>
+        <div className={`px-2 wrap-break-word ${strikethrough[task.completed === false ? 0: 1]} select-none`}>{task.taskName}</div>
       </div>
     </div>
   );
