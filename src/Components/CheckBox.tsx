@@ -1,3 +1,5 @@
+import {motion} from "motion/react"
+
 export function CheckBox({
   size,
   onChange,
@@ -25,10 +27,10 @@ export function CheckBox({
     12: "size-11",
   };
 
-  const checkedmarker = { 1: "flex", 0: "hidden group-hover:block" };
+  // const checkedmarker = { 1: "flex", 0: "w-0 h-0 group-hover:size-full group-hover:rounded-full group-hover:border" };
 
   return (
-    <label className="group inline-flex cursor-pointer items-center">
+    <label className="inline-flex cursor-pointer items-center">
       {/* The actual hidden input */}
       <input
         onChange={onChange}
@@ -39,16 +41,17 @@ export function CheckBox({
 
       {/* The visual checkbox circle */}
       <span
-        className={`${sizeMap[size]} rounded-full border border-gray-500 bg-transparent peer-checked:bg-green-500 ${checkedmarker[checked === true ? 1 : 0]} peer-checked:border-green-500  items-center justify-center transition-all duration-200`}
+        className={`${sizeMap[size]}  border-gray-500 bg-transparent peer-checked:bg-green-500 peer-checked:border-green-500 flex items-center justify-center rounded-full border`}
       >
         {/* The White Checkmark SVG */}
-        <svg
+        
+        <motion.svg
           className={`${checkSizeMap[size]} text-white`}
           viewBox="0 0 16 16"
           fill="currentColor"
         >
           <path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z" />
-        </svg>
+        </motion.svg>
       </span>
     </label>
   );

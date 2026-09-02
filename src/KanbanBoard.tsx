@@ -8,10 +8,42 @@ import {
   type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/react";
+import { PointerSensor, PointerActivationConstraints} from '@dnd-kit/dom'
 import { generateKeyBetween } from "fractional-indexing";
 import { ColumnCard, ColumnCardPreview } from "./ColumnCard";
 import { isSortable } from "@dnd-kit/react/sortable";
 import { TaskCardPreview } from "./TaskCard";
+
+
+// const InitialColumns = [
+//   { id: "afadsfdsfdfasf", name: "1", rank: "a0" },
+//   { id: "aereadsfdsfdfasf", name: "2", rank: "a1" },
+//   { id: "dfadsferr", name: "3", rank: "a2" },
+// ];
+
+// const InitialTasks: Task[] = [
+//   {
+//     id: "rtrtrt",
+//     taskName: "rtrtret",
+//     completed: true,
+//     colId: "afadsfdsfdfasf",
+//     rank: "a0",
+//   },
+//   {
+//     id: "rtrtfdrt",
+//     taskName: "rtrtretdfe",
+//     completed: false,
+//     rank: "a1",
+//     colId: "aereadsfdsfdfasf",
+//   },
+//   {
+//     id: "rtrtrteytuyu",
+//     taskName: "rtdgdgdgdrtret",
+//     completed: false,
+//     colId: "aereadsfdsfdfasf",
+//     rank: "a2",
+//   },
+// ];
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState<Column[]>([]);
@@ -48,7 +80,7 @@ export function KanbanBoard() {
         null,
       );
 
-      return [...prev, { id, taskName, colId, rank: newRank }];
+      return [...prev, { id, taskName, colId, rank: newRank, completed: false }];
     });
   };
 
@@ -70,6 +102,17 @@ export function KanbanBoard() {
         onDragEnd={handledragEnd}
         onDragOver={handleDragOver}
         onDragStart={handleDragStart}
+        sensors={(defaults) => [
+          ...defaults.filter((sensor) => sensor !== PointerSensor),
+          PointerSensor.configure({
+            activationConstraints: [
+              new PointerActivationConstraints.Delay({
+                value: 50,
+                tolerance: 50,
+              }),
+            ],
+          }),
+        ]}
       >
         {sortedColumns.map((cols: Column, ind) => {
           return (
@@ -81,6 +124,7 @@ export function KanbanBoard() {
               key={cols.id}
               generateTask={generateTask}
               tasks={tasks.filter((task) => task.colId === cols.id)}
+              setTasks={setTasks}
               preserveTaskOrder={activeTaskId !== null}
             />
           );
