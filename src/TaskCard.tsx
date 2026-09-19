@@ -25,8 +25,14 @@ export function TaskCard({
 
   const strikethrough = { 1: "line-through", 0: "" };
   const [hovered, setHovered] = useState(false);
-  const CHECKBOX_SIZE = 5;
-  const CHECKBOX_PX = CHECKBOX_SIZE * 4; // tailwind size-5 = 20px (N * 4px)
+
+  const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+  // ONE shared transition — if these differ even slightly, the effect falls apart
+  const REVEAL = { duration: 0.6, ease: EASE, delay: 0.08 };
+
+  const CHECKBOX_SIZE = 4;
+  const CHECKBOX_PX = CHECKBOX_SIZE * 4; // tailwind size-5 = 20px
+
   const showCheckBox = hovered || task.completed;
 
   return (
@@ -40,36 +46,36 @@ export function TaskCard({
       <div
         className={`${isDragging ? "opacity-0" : ""} flex items-center px-2`}
       >
+        {/* Layer 1: WIDTH only — pushes the text via layout */}
         <motion.div
           initial={false}
           animate={{
             width: showCheckBox ? CHECKBOX_PX : 0,
-            opacity: showCheckBox ? 1 : 0
+            opacity: showCheckBox ? 1 : 0,
           }}
-
-          transition={{
-            duration: 0.2,
-            ease: "easeInOut"
-          }}
-          className="overflow-hidden"
-          style={{pointerEvents: showCheckBox ? "auto": "none"}}
+          transition={REVEAL}
+          className="relative shrink-0" // ← overflow-hidden REMOVED
+          style={{ pointerEvents: showCheckBox ? "auto" : "none" }}
         >
-          <CheckBox
-            checked={task.completed}
-            size={5}
-            onChange={(e) => {
-              setTasks((prev) => {
-                return prev.map((t) => {
-                  if (t.id === task.id)
-                    return { ...t, completed: !t.completed };
-                  else return t;
-                });
-              });
-            }}
-          ></CheckBox>
+          {/* Layer 2: OPACITY only — checkbox is full-size the entire time */}
+         
+            <CheckBox
+              checked={task.completed}
+              size={CHECKBOX_SIZE}
+              onChange={(e) => {
+                setTasks((prev) =>
+                  prev.map((t) =>
+                    t.id === task.id ? { ...t, completed: !t.completed } : t,
+                  ),
+                );
+              }}
+            />
+         
         </motion.div>
+
         <div
-          className={`px-2 wrap-break-word ${strikethrough[task.completed === false ? 0 : 1]} select-none`}>
+          className={`px-2 wrap-break-word ${strikethrough[task.completed === false ? 0 : 1]} select-none`}
+        >
           {task.taskName}
         </div>
       </div>
