@@ -36,11 +36,10 @@ export function TaskCard({
   const showCheckBox = hovered || task.completed;
 
   return (
-    <motion.div
-      layout
+    <div
       ref={ref}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={` ${isDragging ? "bg-neutral-400" : " bg-neutral-100"} w-full min-h-12 rounded-md mt-2 flex flex-col justify-center`}
     >
       <div
@@ -79,7 +78,7 @@ export function TaskCard({
           {task.taskName}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
